@@ -1,33 +1,35 @@
 import {IResolvers} from "graphql-tools";
 import * as bcrypt from "bcryptjs";
+// import {sign} from "jsonwebtoken";
 import {User} from "./entity/User";
-import {PubSub, } from 'apollo-server-express';
+// import {PubSub, } from 'apollo-server-express';
 import { stripe } from "./stripe";
-// const { PubSub } = require('apollo-server');
+// import { REFRESH_TOKEN_SECRET, ACCESS_TOKEN_SECRET } from "./constants";
+import { createTokens } from "./auth";
 
-const pubsub = new PubSub();
+// const pubsub = new PubSub();
 
 
-const POST_ADDED = 'POST_ADDED';
+// const POST_ADDED = 'POST_ADDED';
 
 // const pubsub = new PubSub();
 export const resolvers: IResolvers  = {
     Query : {
         me :(_,__,{req}) => {
-            // console.log("Session:::",req.session);
-            if (!req.session.userId){
+            if (!req.userId){
                 return null
             }
-            return User.findOne(req.session.userId);
+            console.log("user ID:::",req.userId);
+            return User.findOne(req .userId);
         },
         get_all_user: async() => {
             return await User.find();
         },
     },
     Mutation: {
-        register: async(_,{email,password},{args}) => {
+        register: async(_,{email,password}) => {
             const hashedPassword = await bcrypt.hash(password, 10);
-            pubsub.publish(POST_ADDED, { postAdded: args });
+            // pubsub.publish(POST_ADDED, { postAdded: args });
             await User.create({
                 email,
                 password : hashedPassword
@@ -35,7 +37,7 @@ export const resolvers: IResolvers  = {
 
             return true;
         },
-        login :  async(_, { email,password },{req}) => { 
+        login :  async(_, { email,password },{res}) => { 
 
             const user = await User.findOne({where:{email }});
             // console.log(user);
@@ -47,7 +49,16 @@ export const resolvers: IResolvers  = {
             if (!valid) {
                 return null ;   
             }
-            req.session.userId = user.id;
+            // console.log("res::::",res.cookie);
+            // name , value , option
+
+            const {accessToken,refreshToken} = createTokens(user);
+            // console.log("accessToken",accessToken);
+            // console.log("refreshToken",refreshToken);
+            
+
+            res.cookie("refresh-token",refreshToken,{expire: 60*60*24*7});
+            res.cookie("access-token",accessToken,{expire: 60*7});
             return user ;
         },
         createSubcription: async (_,{source},{req}) => {
@@ -55,7 +66,7 @@ export const resolvers: IResolvers  = {
             if(!req.session || !req.session.userId) {
                 throw new Error("not authenticated");
             } 
-            const user = await User.findOne(req.session.userId);
+            const user = await User.findOne(req.session.userId); 
             if (!user) {
                 throw new Error();
             }
@@ -69,12 +80,22 @@ export const resolvers: IResolvers  = {
             user.type = "paid";
             await user.save();
             return user;
+        },
+        invalidateTokens: async(_,__,{req}) => {
+            if (!req.userId){
+                return false;
+            } 
+            const user = await User.findOne(req.userId);
+            if (!user) {return false}
+            user.count +=1 ;
+            await user.save();
+            return true;
         }
     },
     Subscription: {
         postAdded: {
           // Additional event labels can be passed to asyncIterator creation
-          subscribe: () => pubsub.asyncIterator([POST_ADDED]),
+        //   subscribe: () => pubsub.asyncIterator([POST_ADDED]),
         },
       },
 }
