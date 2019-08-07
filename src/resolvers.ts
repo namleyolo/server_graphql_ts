@@ -49,7 +49,7 @@ export const resolvers: IResolvers  = {
             if (!valid) {
                 return null ;   
             }
-            // console.log("res::::",res.cookie);
+            console.log("res::::",res.cookie);
             // name , value , option
 
             const {accessToken,refreshToken} = createTokens(user);

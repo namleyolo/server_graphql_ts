@@ -27,7 +27,7 @@ const startServer = async () => {
             onConnect: () => console.log('Connected to websocket'),
             onDisconnect: () => console.log('Connected to websocket'),
         },
-        context: ({req, res} : any) => ({req,res})   });
+        context: ({req, res} : any) => ({req,res}) });
         // context: ({req} : any) => (console.log(req))   });
 
     await createConnection();
@@ -35,6 +35,7 @@ const startServer = async () => {
 
     app.use(cookieParser())
     app.use(async  (req,res,next)=>{
+        
         
         const accessToken = req.cookies['access-token'];
         const refreshToken = req.cookies['refresh-token'];
@@ -47,10 +48,10 @@ const startServer = async () => {
         };
         try {
             const data = verify(accessToken,ACCESS_TOKEN_SECRET) as any;
-            (req as any).userId = data.userId; 
-            return next();  
+            (req as any).userId = data.userId;   
         }
         catch {
+            return next();
             // console.log(refreshToken,accessToken);
         };
         let data;
@@ -83,7 +84,12 @@ const startServer = async () => {
         next();
     });
 
-    server.applyMiddleware({app});  
+    // server.applyMiddleware({app});  
+
+    server.applyMiddleware({app,cors:{
+            credentials : true,
+            origin : "http://localhost:3000"
+    }});  
 
     app.listen({port : 4000},() => {
         console.log("connected port 4000" + server.graphqlPath);
