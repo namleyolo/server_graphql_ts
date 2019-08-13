@@ -23,20 +23,19 @@ const startServer = async () => {
     const server = new ApolloServer({
         typeDefs,
         resolvers,
-        subscriptions: {
-            onConnect: () => console.log('Connected to websocket'),
-            onDisconnect: () => console.log('Connected to websocket'),
-        },
-        context: ({req, res} : any) => ({req,res}) });
-        // context: ({req} : any) => (console.log(req))   });
+        // context: ({req, res} : any) => ({req,res}) });
+        context: ({req,res} : any) => {
+            // console.log("req:::",req.cookies);
+            // console.log("res::::",res.cookie);
+            return {req,res}  }
+    });
 
     await createConnection();
     const app = express();
 
     app.use(cookieParser())
     app.use(async  (req,res,next)=>{
-        
-        
+          
         const accessToken = req.cookies['access-token'];
         const refreshToken = req.cookies['refresh-token'];
 
@@ -65,6 +64,7 @@ const startServer = async () => {
         }
 
         const user = await User.findOne(data.userId);
+        console.log("userL:::",user);
         try {
             console.log(user);
         } catch (error) {
@@ -75,6 +75,7 @@ const startServer = async () => {
             return next();
         }
         const tokens = createTokens(user);
+        console.log("tokens::",tokens)
         res.cookie("access-token",tokens.accessToken);
         res.cookie("refresh-token",tokens.refreshToken);
         (req as any).userId = user.id;
@@ -93,7 +94,6 @@ const startServer = async () => {
 
     app.listen({port : 4000},() => {
         console.log("connected port 4000" + server.graphqlPath);
-        // console.log(`Subscriptions ready at ws://localhost:${port}${server.subscriptionsPath}`)
 
     });
 }

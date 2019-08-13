@@ -2,6 +2,7 @@ import {IResolvers} from "graphql-tools";
 import * as bcrypt from "bcryptjs";
 // import {sign} from "jsonwebtoken";
 import {User} from "./entity/User";
+import {Device} from "./entity/Device";
 // import {PubSub, } from 'apollo-server-express';
 import { stripe } from "./stripe";
 // import { REFRESH_TOKEN_SECRET, ACCESS_TOKEN_SECRET } from "./constants";
@@ -25,11 +26,21 @@ export const resolvers: IResolvers  = {
         get_all_user: async() => {
             return await User.find();
         },
+        get_all_device : (_,__,{req}) => {
+            if (!req.userId){
+                return null
+            }
+            return Device.find();
+        } 
     },
     Mutation: {
         register: async(_,{email,password}) => {
+            const checkUser = await User.findOne({where: {email: email}});
+            if (checkUser) {
+                return null;
+            };
+
             const hashedPassword = await bcrypt.hash(password, 10);
-            // pubsub.publish(POST_ADDED, { postAdded: args });
             await User.create({
                 email,
                 password : hashedPassword

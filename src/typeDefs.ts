@@ -10,10 +10,17 @@ export const typeDefs = gql`
            email: String
      }
 
+     type AllDevice{
+           id : ID
+           count: Int
+           status : Int
+     }
+
 
      type Query {
            me : User,
-           get_all_user: [AllUser]
+           get_all_user: [AllUser],
+           get_all_device : [AllDevice]
      }
 
      type Mutation {
