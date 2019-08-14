@@ -23,6 +23,7 @@
       "express": "^4.17.1",
       "express-graphql": "^0.9.0",
       "express-session": "^1.16.2",
+      "flash": "^1.1.0",
       "graphql": "^14.4.2",
       "http": "^0.0.0",
       "jsonwebtoken": "^8.5.1",

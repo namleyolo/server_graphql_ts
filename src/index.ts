@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import "dotenv/config";
+
 import {createConnection} from "typeorm";
 // import createTokens from "./auth";
 import {ApolloServer} from "apollo-server-express";
@@ -14,6 +15,7 @@ import * as cookieParser from "cookie-parser";
 import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from "./constants";
 import { User } from "./entity/User";
 import { createTokens } from "./auth";
+
 // import * as session from "express-session";
 
 // stripe;
@@ -32,6 +34,7 @@ const startServer = async () => {
 
     await createConnection();
     const app = express();
+
 
     app.use(cookieParser())
     app.use(async  (req,res,next)=>{

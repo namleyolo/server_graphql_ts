@@ -23,8 +23,11 @@ export const resolvers: IResolvers  = {
             console.log("user ID:::",req.userId);
             return User.findOne(req .userId);
         },
-        get_all_user: async() => {
-            return await User.find();
+        get_all_user: (_,__,{req}) => {
+            if (!req.userId){
+                return null
+            }
+            return  User.find();
         },
         get_all_device : (_,__,{req}) => {
             if (!req.userId){

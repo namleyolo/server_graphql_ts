@@ -1325,6 +1325,11 @@ find-up@^3.0.0:
   dependencies:
     locate-path "^3.0.0"
 
+flash@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/flash/-/flash-1.1.0.tgz#8ab2b29ed3b68a5cfb1a89bf98e7f69d7f1a020a"
+  integrity sha1-irKyntO2ilz7Gom/mOf2nX8aAgo=
+
 for-in@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/for-in/-/for-in-1.0.2.tgz#81068d295a8142ec0ac726c6e2200c30fb6d5e80"
