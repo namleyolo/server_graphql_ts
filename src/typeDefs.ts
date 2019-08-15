@@ -8,6 +8,8 @@ export const typeDefs = gql`
      type AllUser{
            id: ID
            email: String
+           stripeId : String
+           password : String
      }
 
      type AllDevice{
@@ -26,6 +28,8 @@ export const typeDefs = gql`
      type Mutation {
            register(email: String!, password: String!): Boolean
            login(email: String!,password:String!)     : User
+           updateUser(email:String!, password: String!, newPassword: String!) : User 
+           deleteUser(email:String,password: String,id: Int): Boolean
            createSubcription(source: String!) : User
            invalidateTokens: Boolean
      }

@@ -8,6 +8,8 @@ import { stripe } from "./stripe";
 // import { REFRESH_TOKEN_SECRET, ACCESS_TOKEN_SECRET } from "./constants";
 import { createTokens } from "./auth";
 
+
+
 // const pubsub = new PubSub();
 
 
@@ -16,21 +18,25 @@ import { createTokens } from "./auth";
 // const pubsub = new PubSub();
 export const resolvers: IResolvers  = {
     Query : {
-        me :(_,__,{req}) => {
+        me : (_,__,{req,res}) => {
             if (!req.userId){
-                return null
-            }
+                // await res.write({message: `Need to login`});
+                return null;
+                res.json({message: "ngu"})
+            };
             console.log("user ID:::",req.userId);
             return User.findOne(req .userId);
         },
-        get_all_user: (_,__,{req}) => {
+        get_all_user: async(_,__,{req,res}) => {
             if (!req.userId){
+                await res.write({message: `Need to login`});
                 return null
             }
             return  User.find();
         },
-        get_all_device : (_,__,{req}) => {
+        get_all_device : async(_,__,{req,res}) => {
             if (!req.userId){
+                await res.write({message: `Need to login`});
                 return null
             }
             return Device.find();
@@ -51,6 +57,38 @@ export const resolvers: IResolvers  = {
 
             return true;
         },
+        updateUser : async(_,{email,password,newPassword}) => {
+            const getUser = await User.findOne({where: {email: email} });
+            if (!getUser) {
+                return null;
+            }
+            const valid = await bcrypt.compare(password, getUser.password);
+            if (!valid) {
+                // res.send({message: `Wrong password`});
+                return null};
+            const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+            await User.update({email},{password: hashedNewPassword}).then(() => {
+                console.log("updated")
+            }).catch( (err: any) => console.log(err));
+            return getUser ;
+
+        },
+        deleteUser: async(_,{email,password,id}) => {
+            console.log(id);
+            const getUser = await User.findOne({where: {email: email} });
+            if (!getUser) {
+                return null;
+            }
+            const valid = await bcrypt.compare(password, getUser.password);
+            if (!valid) {
+                return null
+            }
+            // console.log(email,password);
+            let userWillDelete : any = await User.findOne({email:email});
+            await User.remove(userWillDelete);
+            return true;
+
+        },
         login :  async(_, { email,password },{res}) => { 
 
             const user = await User.findOne({where:{email }});
@@ -63,7 +101,7 @@ export const resolvers: IResolvers  = {
             if (!valid) {
                 return null ;   
             }
-            console.log("res::::",res.cookie);
+            // console.log("res::::",res.cookie);
             // name , value , option
 
             const {accessToken,refreshToken} = createTokens(user);
@@ -72,7 +110,7 @@ export const resolvers: IResolvers  = {
             
 
             res.cookie("refresh-token",refreshToken,{expire: 60*60*24*7});
-            res.cookie("access-token",accessToken,{expire: 60*7});
+            res.cookie("access-token",accessToken,{expire: 60*60*7});
             return user ;
         },
         createSubcription: async (_,{source},{req}) => {

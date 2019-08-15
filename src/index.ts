@@ -59,7 +59,7 @@ const startServer = async () => {
         let data;
         try {
             data = verify(refreshToken,REFRESH_TOKEN_SECRET) as any;        
-            console.log("data::",data); 
+            // console.log("data::",data); 
         }
         catch{
             console.log("refreshToken is invalid ")
@@ -67,7 +67,7 @@ const startServer = async () => {
         }
 
         const user = await User.findOne(data.userId);
-        console.log("userL:::",user);
+        // console.log("userL:::",user);
         try {
             console.log(user);
         } catch (error) {
